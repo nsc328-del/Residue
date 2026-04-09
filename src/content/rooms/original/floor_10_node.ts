@@ -4,7 +4,7 @@
 //   tpl_o_10_node_light_burst  — selected when only light debts are open
 //   tpl_o_10_node_hard         — selected when no debt is open
 //
-// The generator picks via responds_to_debt_triggers + scoring; the heaviest
+// The generator picks via responds_to_cost_triggers + scoring; the heaviest
 // match wins. is_node + floor lock guarantees this floor always picks one of
 // the three.
 
@@ -20,31 +20,31 @@ export const ORIGINAL_FLOOR_10_NODES: RoomTemplate[] = [
     requires: [],
     prefers: [],
     forbids: [],
-    responds_to_debt_triggers: ["pursuit", "backflow", "doppelganger", "forged_break"],
+    responds_to_cost_triggers: ["pursuit", "backflow", "doppelganger", "forged_break"],
     obstacle:
-      "整间房就是你们之前借的那笔大债的实体。它已经追上来了。问题不是怎么把它打掉——问题是怎么让它消失。",
+      "整间房就是你们之前借的那笔重代价的实体。它已经追上来了。问题不是怎么把它打掉——问题是怎么让它消失。",
     anchors: [
       {
         id: "a_debt_made_flesh",
         name: "走在前方的'你们之前借的那个东西'",
         tags: ["pursuit", "echo"],
-        hint: "它的形态由你们之前留下的债决定",
+        hint: "它的形态由你们之前留下的代价决定",
       },
       {
         id: "a_forge_altar",
         name: "可以伪造一段历史的注册台",
         tags: ["device", "forge"],
-        hint: "用一段假记录把这条债从世界里抹掉（但伪造本身是新债）",
+        hint: "用一段假记录把这条代价从世界里抹掉（但伪造本身是新代价）",
       },
       {
         id: "a_shoulder",
-        name: "可以把债转嫁到别的系统的接口",
+        name: "可以把代价转嫁到别的系统的接口",
         tags: ["device", "transfer"],
         hint: "把债推给别的东西，自己脱身",
       },
       {
         id: "a_accept",
-        name: "可以让债永久固化的接受口",
+        name: "可以让代价永久固化的接受口",
         tags: ["device", "rule_change"],
         hint: "接受这条事实成为世界的一部分。代价：你们的某个身份从此不一样",
       },
@@ -53,12 +53,12 @@ export const ORIGINAL_FLOOR_10_NODES: RoomTemplate[] = [
       {
         id: "e_forge",
         kind: "ascend",
-        hint: "伪造一段历史抹掉这条债（轻债换重债）",
+        hint: "伪造一段历史抹掉这条代价（轻代价换重代价）",
       },
       {
         id: "e_transfer",
         kind: "ascend",
-        hint: "把债转嫁出去（区域改写）",
+        hint: "把代价转嫁出去（区域改写）",
       },
       {
         id: "e_accept",
@@ -77,9 +77,9 @@ export const ORIGINAL_FLOOR_10_NODES: RoomTemplate[] = [
     requires: [],
     prefers: [],
     forbids: ["pursuit", "backflow", "doppelganger"],
-    responds_to_debt_triggers: ["scanner_density+", "identity_doubt", "trace_smell"],
+    responds_to_cost_triggers: ["scanner_density+", "identity_doubt", "trace_smell"],
     obstacle:
-      "之前那笔小债突然变大。一开始只是一个误读，现在那个误读已经长成了一整面针对你们的搜捕网。",
+      "之前那笔小代价突然变大。一开始只是一个误读，现在那个误读已经长成了一整面针对你们的搜捕网。",
     anchors: [
       {
         id: "a_swelling_search",
@@ -124,7 +124,7 @@ export const ORIGINAL_FLOOR_10_NODES: RoomTemplate[] = [
     prefers: ["barrier"],
     forbids: ["pursuit", "backflow", "scanner_density+", "identity_doubt", "trace_smell"],
     obstacle:
-      "一段没有先前后果可借力的硬阻碍。这里只有当下：一道你们必须当场处理的封控。没有回响，没有债，没有便宜可占。",
+      "一段没有先前后果可借力的硬阻碍。这里只有当下：一道你们必须当场处理的封控。没有回响，没有代价，没有便宜可占。",
     anchors: [
       {
         id: "a_clean_barrier",

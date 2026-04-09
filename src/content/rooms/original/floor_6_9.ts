@@ -1,6 +1,6 @@
 // Act 2 — Floors 6-9, original world line. The player chose to stay in the
 // original ascending order. These rooms get progressively more pressured.
-// Templates with `responds_to_debt_triggers` will outscore generics when the
+// Templates with `responds_to_cost_triggers` will outscore generics when the
 // player is carrying matching debts.
 
 import type { RoomTemplate } from "../types.js";
@@ -54,7 +54,7 @@ export const ORIGINAL_FLOOR_6_9_TEMPLATES: RoomTemplate[] = [
     requires: [],
     prefers: [],
     forbids: [],
-    responds_to_debt_triggers: ["identity_doubt", "scanner_density+"],
+    responds_to_cost_triggers: ["identity_doubt", "scanner_density+"],
     obstacle:
       "前方架起了一面身份核验台。它不是冲你们来的——它是冲你们随手带走的那块身份残片来的。但你们带着它，所以它会扫到你们。",
     anchors: [
@@ -86,7 +86,7 @@ export const ORIGINAL_FLOOR_6_9_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_legalize",
         kind: "ascend",
-        hint: "把残片改写成合法的（区域改写：留中度债）",
+        hint: "把残片改写成合法的（区域改写：留中度代价）",
       },
     ],
   },
@@ -100,7 +100,7 @@ export const ORIGINAL_FLOOR_6_9_TEMPLATES: RoomTemplate[] = [
     requires: [],
     prefers: [],
     forbids: [],
-    responds_to_debt_triggers: ["trace_smell", "scanner_density+"],
+    responds_to_cost_triggers: ["trace_smell", "scanner_density+"],
     obstacle:
       "前方走廊里有一群从未见过的小型嗅探单位。它们闻得出维护井里那道暴力损伤上残留的你们。",
     anchors: [

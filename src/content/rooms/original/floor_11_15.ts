@@ -44,7 +44,7 @@ export const ORIGINAL_FLOOR_11_15_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_pay_more",
         kind: "ascend",
-        hint: "再付一次代价让本层让路（区域改写：注意债已经在变贵）",
+        hint: "再付一次代价让本层让路（区域改写：注意代价已经在变贵）",
       },
     ],
   },
@@ -57,7 +57,7 @@ export const ORIGINAL_FLOOR_11_15_TEMPLATES: RoomTemplate[] = [
     requires: [],
     prefers: [],
     forbids: [],
-    responds_to_debt_triggers: ["doppelganger", "identity_doubt"],
+    responds_to_cost_triggers: ["doppelganger", "identity_doubt"],
     obstacle:
       "你们走进的房间里站着另一个'你们'。它比你们走得快，比你们更熟悉这一层。它是你们之前留下的某个东西长成的。",
     anchors: [
@@ -71,14 +71,14 @@ export const ORIGINAL_FLOOR_11_15_TEMPLATES: RoomTemplate[] = [
         id: "a_settle_offer",
         name: "可以把身份还回去的接口",
         tags: ["device", "settle"],
-        hint: "结清之前那条身份债",
+        hint: "结清之前那条身份代价",
       },
     ],
     exits: [
       {
         id: "e_settle",
         kind: "ascend",
-        hint: "结清那条身份债再上行",
+        hint: "结清那条身份代价再上行",
       },
       {
         id: "e_walk_past",
@@ -111,7 +111,7 @@ export const ORIGINAL_FLOOR_11_15_TEMPLATES: RoomTemplate[] = [
         id: "a_what_remains",
         name: "你们身上剩下的所有东西",
         tags: ["aftermath"],
-        hint: "债、伪造记录、被改写的身份、未结的事实——它们决定外面是什么样",
+        hint: "代价、伪造记录、被改写的身份、未结的事实——它们决定外面是什么样",
       },
     ],
     exits: [

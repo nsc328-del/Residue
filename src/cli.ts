@@ -15,6 +15,7 @@ import { runRoom } from "./commands/room.js";
 import { runDebugFacts } from "./commands/debug-facts.js";
 import { runEndCheck } from "./commands/end-check.js";
 import { runMemory } from "./commands/memory.js";
+import { runSaves, runContinue, runDelete } from "./commands/saves.js";
 import { DEFAULT_STATE_DIR } from "./state/load.js";
 
 type ParsedArgs = {
@@ -50,6 +51,10 @@ function getStateDir(flags: Record<string, string | boolean>): string {
   return typeof v === "string" ? v : DEFAULT_STATE_DIR;
 }
 
+function hasExplicitStateDir(flags: Record<string, string | boolean>): boolean {
+  return typeof flags["state-dir"] === "string";
+}
+
 function printHelp(): void {
   process.stdout.write(
     [
@@ -58,8 +63,11 @@ function printHelp(): void {
       "Usage: residue <command> [args] [--state-dir <path>]",
       "",
       "Commands:",
-      "  init [--seed N] [--story S] [--force]   Start a new run",
+      "  init [--seed N] [--story S] [--force]   Start a new run (auto-saved)",
       "    stories: residue, stolen_face, memory_shard, debt_walker, echo_child, tower_nerve",
+      "  saves                       List all save slots",
+      "  continue <name>             Switch to a different save",
+      "  delete <name>               Delete a save slot",
       "  state                       Print full state.json",
       "  status                      One-line summary",
       "  room                        Print current room",
@@ -90,8 +98,26 @@ async function main(): Promise<void> {
       const force = args.flags["force"] === true;
       const storyFlag = args.flags["story"];
       const story = typeof storyFlag === "string" ? storyFlag : undefined;
-      const out = runInit({ stateDir, seed, force, story });
+      const useSaves = !hasExplicitStateDir(args.flags);
+      const out = runInit({ stateDir, seed, force, story, useSaves });
       process.stdout.write(out + "\n");
+      return;
+    }
+
+    case "saves": {
+      process.stdout.write(runSaves() + "\n");
+      return;
+    }
+
+    case "continue": {
+      const name = args.positional[0] ?? "";
+      process.stdout.write(runContinue(name) + "\n");
+      return;
+    }
+
+    case "delete": {
+      const name = args.positional[0] ?? "";
+      process.stdout.write(runDelete(name) + "\n");
       return;
     }
 

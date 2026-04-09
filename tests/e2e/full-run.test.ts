@@ -1,6 +1,6 @@
 // End-to-end: simulate a "fake agent" playing the full 15 floors. Two paths:
 //   - Conservative: stay on the original world line, mostly local rewrites,
-//     take the temptation on floor 3, settle the debt on floor 10.
+//     take the temptation on floor 3, settle the cost on floor 10.
 //   - Adventurous: trigger a worldline fork around floor 5, ride the unowned
 //     region world line to the top.
 //
@@ -74,8 +74,8 @@ const grabIdentity = (sentence: string): Diff => ({
       },
     },
     {
-      op: "add_debt",
-      debt: {
+      op: "add_cost",
+      cost: {
         severity: "light",
         text: "你们带走了一片不属于你们的身份残片",
         triggers: ["identity_doubt"],
@@ -85,7 +85,7 @@ const grabIdentity = (sentence: string): Diff => ({
 });
 
 describe("e2e full run — conservative path", () => {
-  it("walks 15 floors on the original world line, takes the bait on floor 3, settles a heavy debt on floor 10", () => {
+  it("walks 15 floors on the original world line, takes the bait on floor 3, settles a heavy cost on floor 10", () => {
     let s = startRun(1);
     expect(s.current_room.floor).toBe(1);
     expect(s.current_room.theme).toBe("original");
@@ -102,9 +102,9 @@ describe("e2e full run — conservative path", () => {
     // Floor 3 → 4 (take the bait)
     s = step(s, grabIdentity("顺手把身份残片摘走"));
     expect(s.meta.floor).toBe(4);
-    expect(s.debts.filter((d) => !d.settled)).toHaveLength(1);
+    expect(s.costs.filter((c) => !c.settled)).toHaveLength(1);
     // The echo template should be the one selected on floor 4 because we owe
-    // an identity_doubt debt.
+    // an identity_doubt cost.
     expect(s.current_room.template_id).toBe("tpl_o_4_echo");
 
     // Floor 4 → 5 (the central node)
@@ -127,8 +127,8 @@ describe("e2e full run — conservative path", () => {
           },
         },
         {
-          op: "add_debt",
-          debt: {
+          op: "add_cost",
+          cost: {
             severity: "light",
             text: "本层的封控权属在账本上有缺口",
             triggers: ["scanner_density+"],
@@ -139,23 +139,23 @@ describe("e2e full run — conservative path", () => {
     expect(s.meta.floor).toBe(6);
 
     // Floors 6, 7, 8, 9 — generic walking. The generator may pick the
-    // identity_doubt callback room since we still owe that debt.
+    // identity_doubt callback room since we still owe that cost.
     for (let i = 0; i < 4; i++) {
       s = step(s, local("继续往上", "我们穿过了这一层"));
     }
     expect(s.meta.floor).toBe(10);
 
-    // Floor 10 should be a node. With only light debts open we expect the
+    // Floor 10 should be a node. With only light costs open we expect the
     // light_burst variant (not the heavy repay node).
     expect(s.current_room.template_id).toBe("tpl_o_10_node_light_burst");
 
-    // Settle the identity debt by transferring it.
-    const identityDebt = s.debts.find((d) => !d.settled && d.triggers.includes("identity_doubt"));
-    expect(identityDebt).toBeDefined();
+    // Settle the identity cost by transferring it.
+    const identityCost = s.costs.find((c) => !c.settled && c.triggers.includes("identity_doubt"));
+    expect(identityCost).toBeDefined();
     s = step(s, {
       player_sentence: "把那块身份还回去",
-      rationale: "settle the identity debt",
-      operations: [{ op: "settle_debt", id: identityDebt!.id }],
+      rationale: "settle the identity cost",
+      operations: [{ op: "settle_cost", id: identityCost!.id }],
     });
     expect(s.meta.floor).toBe(11);
 
@@ -192,16 +192,16 @@ describe("e2e full run — adventurous path", () => {
         { op: "remove_fact", id: "f_init_order" },
         { op: "jump_floor", to: 8 },
         {
-          op: "add_debt",
-          debt: {
+          op: "add_cost",
+          cost: {
             severity: "medium",
             text: "下方 N 层的看守体系没见过你们但知道你们跳过了他们",
             triggers: ["backflow", "pursuit"],
           },
         },
         {
-          op: "add_debt",
-          debt: {
+          op: "add_cost",
+          cost: {
             severity: "light",
             text: "无主区的接缝从未被你们经过",
             triggers: ["unowned"],
@@ -227,19 +227,19 @@ describe("e2e full run — adventurous path", () => {
     expect(s.meta.floor).toBe(10);
     expect(s.current_room.template_id).toBe("tpl_ur_10_node_repay");
 
-    // Settle the heavy debt by accepting it (structural)
-    const backflowDebt = s.debts.find(
-      (d) => !d.settled && d.triggers.includes("backflow")
+    // Settle the heavy cost by accepting it (structural)
+    const backflowCost = s.costs.find(
+      (c) => !c.settled && c.triggers.includes("backflow")
     );
-    expect(backflowDebt).toBeDefined();
+    expect(backflowCost).toBeDefined();
     s = step(s, {
       player_sentence: "让世界以为我们一层一层穿过来过",
-      rationale: "forge a passage record — light-debt-for-medium-debt swap",
+      rationale: "forge a passage record — light-cost-for-medium-cost swap",
       operations: [
-        { op: "settle_debt", id: backflowDebt!.id },
+        { op: "settle_cost", id: backflowCost!.id },
         {
-          op: "add_debt",
-          debt: {
+          op: "add_cost",
+          cost: {
             severity: "light",
             text: "那段穿过记录是伪造的",
             triggers: ["forged_record", "forged_break"],

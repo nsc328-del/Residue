@@ -1,6 +1,10 @@
 node_modules
 dist
 run
+saves
 *.log
 .DS_Store
 current-design-summary.md
+run.bak
+view/node_modules
+view/dist

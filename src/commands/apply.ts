@@ -31,7 +31,7 @@ export function runApply(args: ApplyArgs): string {
   }
 
   const next = result.state;
-  // Regenerate the room based on the new fact set / debts / floor / theme.
+  // Regenerate the room based on the new fact set / costs / floor / theme.
   next.current_room = generateRoom(next);
   saveState(next, args.stateDir);
 
@@ -44,7 +44,7 @@ export function runApply(args: ApplyArgs): string {
     resulting_floor: next.meta.floor,
     resulting_world_line: next.world_line.current,
     resulting_room_id: next.current_room.id,
-    debt_ids_after: next.debts.filter((d) => !d.settled).map((d) => d.id),
+    cost_ids_after: next.costs.filter((c) => !c.settled).map((c) => c.id),
   };
   appendHistory(entry, args.stateDir);
 
@@ -54,8 +54,8 @@ export function runApply(args: ApplyArgs): string {
       turn: next.meta.turn,
       floor: next.meta.floor,
       world_line: next.world_line.current,
-      debt_pressure: next.partner_state.debt_pressure,
-      open_debts: next.debts.filter((d) => !d.settled).length,
+      cost_pressure: next.partner_state.cost_pressure,
+      open_costs: next.costs.filter((c) => !c.settled).length,
       summary: next.partner_state.last_diff_summary,
     },
     null,

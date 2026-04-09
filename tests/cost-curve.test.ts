@@ -25,7 +25,7 @@ function mkState(facts: Fact[]): State {
     },
     world_line: { current: "original", forks: [] },
     facts,
-    debts: [],
+    costs: [],
     current_room: {
       id: "r0",
       template_id: "tpl0",
@@ -37,7 +37,7 @@ function mkState(facts: Fact[]): State {
       active_fact_ids: [],
       generated_from: [],
     },
-    partner_state: { debt_pressure: 0, last_diff_summary: null },
+    partner_state: { cost_pressure: 0, last_diff_summary: null },
   };
 }
 
@@ -67,20 +67,20 @@ describe("cost curve", () => {
   });
 
   describe("region scope", () => {
-    it("rejects region removal without a debt", () => {
+    it("rejects region removal without a cost", () => {
       const state = mkState([mkFact({ id: "f1", scope: "region" })]);
       const diff = mkDiff([{ op: "remove_fact", id: "f1" }]);
       const errors = validateDiff(diff, state);
-      expect(errors.map((e) => e.code)).toContain("REGION_NEEDS_LIGHT_DEBT");
+      expect(errors.map((e) => e.code)).toContain("REGION_NEEDS_LIGHT_COST");
     });
 
-    it("accepts region removal with a light debt", () => {
+    it("accepts region removal with a light cost", () => {
       const state = mkState([mkFact({ id: "f1", scope: "region" })]);
       const diff = mkDiff([
         { op: "remove_fact", id: "f1" },
         {
-          op: "add_debt",
-          debt: { severity: "light", text: "x", triggers: [] },
+          op: "add_cost",
+          cost: { severity: "light", text: "x", triggers: [] },
         },
       ]);
       expect(validateDiff(diff, state)).toEqual([]);
@@ -88,36 +88,36 @@ describe("cost curve", () => {
   });
 
   describe("structural scope", () => {
-    it("rejects structural removal without 2 debts", () => {
+    it("rejects structural removal without 2 costs", () => {
       const state = mkState([mkFact({ id: "f1", scope: "structural" })]);
       const diff = mkDiff([
         { op: "remove_fact", id: "f1" },
         {
-          op: "add_debt",
-          debt: { severity: "medium", text: "x", triggers: [] },
+          op: "add_cost",
+          cost: { severity: "medium", text: "x", triggers: [] },
         },
       ]);
       const errors = validateDiff(diff, state);
-      expect(errors.map((e) => e.code)).toContain("STRUCTURAL_NEEDS_TWO_DEBTS");
+      expect(errors.map((e) => e.code)).toContain("STRUCTURAL_NEEDS_TWO_COSTS");
     });
 
-    it("rejects structural removal without a medium debt", () => {
+    it("rejects structural removal without a medium cost", () => {
       const state = mkState([mkFact({ id: "f1", scope: "structural" })]);
       const diff = mkDiff([
         { op: "remove_fact", id: "f1" },
-        { op: "add_debt", debt: { severity: "light", text: "x", triggers: [] } },
-        { op: "add_debt", debt: { severity: "light", text: "y", triggers: [] } },
+        { op: "add_cost", cost: { severity: "light", text: "x", triggers: [] } },
+        { op: "add_cost", cost: { severity: "light", text: "y", triggers: [] } },
       ]);
       const errors = validateDiff(diff, state);
       expect(errors.map((e) => e.code)).toContain("STRUCTURAL_NEEDS_MEDIUM");
     });
 
-    it("accepts structural removal with 2 debts including a medium", () => {
+    it("accepts structural removal with 2 costs including a medium", () => {
       const state = mkState([mkFact({ id: "f1", scope: "structural" })]);
       const diff = mkDiff([
         { op: "remove_fact", id: "f1" },
-        { op: "add_debt", debt: { severity: "medium", text: "x", triggers: [] } },
-        { op: "add_debt", debt: { severity: "light", text: "y", triggers: [] } },
+        { op: "add_cost", cost: { severity: "medium", text: "x", triggers: [] } },
+        { op: "add_cost", cost: { severity: "light", text: "y", triggers: [] } },
       ]);
       expect(validateDiff(diff, state)).toEqual([]);
     });
@@ -128,8 +128,8 @@ describe("cost curve", () => {
       ]);
       const diff = mkDiff([
         { op: "remove_fact", id: "f1" },
-        { op: "add_debt", debt: { severity: "medium", text: "x", triggers: [] } },
-        { op: "add_debt", debt: { severity: "light", text: "y", triggers: [] } },
+        { op: "add_cost", cost: { severity: "medium", text: "x", triggers: [] } },
+        { op: "add_cost", cost: { severity: "light", text: "y", triggers: [] } },
       ]);
       const errors = validateDiff(diff, state);
       expect(errors.map((e) => e.code)).toContain("WORLDLINE_FORK_MISSING");
@@ -141,8 +141,8 @@ describe("cost curve", () => {
       ]);
       const diff = mkDiff([
         { op: "remove_fact", id: "f1" },
-        { op: "add_debt", debt: { severity: "medium", text: "x", triggers: [] } },
-        { op: "add_debt", debt: { severity: "light", text: "y", triggers: [] } },
+        { op: "add_cost", cost: { severity: "medium", text: "x", triggers: [] } },
+        { op: "add_cost", cost: { severity: "light", text: "y", triggers: [] } },
         { op: "mark_worldline_fork", to: "unowned_region", cause: "skip" },
       ]);
       expect(validateDiff(diff, state)).toEqual([]);

@@ -57,7 +57,7 @@ export const UNOWNED_REGION_FLOOR_6_10_TEMPLATES: RoomTemplate[] = [
     requires: [],
     prefers: ["unowned"],
     forbids: [],
-    responds_to_debt_triggers: ["doppelganger", "identity_doubt"],
+    responds_to_cost_triggers: ["doppelganger", "identity_doubt"],
     obstacle:
       "前方某个旁路上溜过去一个戴着你们壳的他者。它走得比你们还快，没有回头看。无主区把你们留下的位置交给了别人。",
     anchors: [
@@ -99,9 +99,9 @@ export const UNOWNED_REGION_FLOOR_6_10_TEMPLATES: RoomTemplate[] = [
     requires: [],
     prefers: [],
     forbids: [],
-    responds_to_debt_triggers: ["pursuit", "backflow", "doppelganger", "forged_break"],
+    responds_to_cost_triggers: ["pursuit", "backflow", "doppelganger", "forged_break"],
     obstacle:
-      "追兵终于追上了。这里的空间几乎被他们填满。整间房就是这条债的实体——问题不再是怎么过，是怎么让这条事实从世界里消失。",
+      "追兵终于追上了。这里的空间几乎被他们填满。整间房就是这条代价的实体——问题不再是怎么过，是怎么让这条事实从世界里消失。",
     anchors: [
       {
         id: "a_pursuit_arrived",
@@ -132,7 +132,7 @@ export const UNOWNED_REGION_FLOOR_6_10_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_forge",
         kind: "ascend",
-        hint: "伪造历史抹掉这条债（轻债换重债）",
+        hint: "伪造历史抹掉这条代价（轻代价换重代价）",
       },
       {
         id: "e_offer_doppel",

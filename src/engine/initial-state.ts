@@ -53,10 +53,10 @@ export function buildInitialState(opts: InitOptions = {}): State {
       forks: [],
     },
     facts,
-    debts: [],
+    costs: [],
     current_room: PLACEHOLDER_ROOM,
     partner_state: {
-      debt_pressure: 0,
+      cost_pressure: 0,
       last_diff_summary: null,
     },
   };

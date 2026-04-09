@@ -108,7 +108,7 @@ export const STORYLINE_FLOOR_1_TEMPLATES: RoomTemplate[] = [
     anchors: [
       {
         id: "a_collector",
-        name: "走廊尽头的收债者轮廓",
+        name: "走廊尽头的收取代价者轮廓",
         tags: ["pursuit", "barrier"],
         hint: "它不会追你——但你要过去就得从它身边走",
       },
@@ -120,7 +120,7 @@ export const STORYLINE_FLOOR_1_TEMPLATES: RoomTemplate[] = [
       },
       {
         id: "a_side_crack",
-        name: "收债者身后的一道墙缝",
+        name: "收取代价者身后的一道墙缝",
         tags: ["passage"],
         hint: "不从正面过去——但墙缝里面更暗",
       },
@@ -129,7 +129,7 @@ export const STORYLINE_FLOOR_1_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_face_collector",
         kind: "ascend",
-        hint: "直接从收债者身边走过去",
+        hint: "直接从收取代价者身边走过去",
       },
       {
         id: "e_read_ledger",

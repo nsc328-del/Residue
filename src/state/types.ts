@@ -15,11 +15,11 @@ export type Fact = {
   immutable_reason?: string; // hint for root facts ("you are the escaping core")
 };
 
-export type DebtSeverity = "light" | "medium" | "heavy";
+export type CostSeverity = "light" | "medium" | "heavy";
 
-export type Debt = {
+export type Cost = {
   id: string;
-  severity: DebtSeverity;
+  severity: CostSeverity;
   text: string;
   source_turn: number;
   settled: boolean;
@@ -67,7 +67,7 @@ export type WorldLineFork = {
 
 export type PartnerState = {
   // Engine exposes raw signals; the agent decides how to perform.
-  debt_pressure: number; // 0..100
+  cost_pressure: number; // 0..100
   last_diff_summary: string | null;
 };
 
@@ -86,7 +86,7 @@ export type State = {
   meta: Meta;
   world_line: WorldLine;
   facts: Fact[];
-  debts: Debt[];
+  costs: Cost[];
   current_room: Room;
   partner_state: PartnerState;
 };
@@ -96,8 +96,8 @@ export type State = {
 export type DiffOp =
   | { op: "add_fact"; fact: NewFact }
   | { op: "remove_fact"; id: string }
-  | { op: "add_debt"; debt: NewDebt }
-  | { op: "settle_debt"; id: string }
+  | { op: "add_cost"; cost: NewCost }
+  | { op: "settle_cost"; id: string }
   | { op: "consume_perma_token" }
   | { op: "mark_worldline_fork"; to: string; cause: string }
   // jump_floor: declare a non-default floor advancement. Default is +1 per
@@ -112,9 +112,9 @@ export type NewFact = {
   tags: string[];
 };
 
-export type NewDebt = {
+export type NewCost = {
   id?: string;
-  severity: DebtSeverity;
+  severity: CostSeverity;
   text: string;
   triggers: string[];
 };
@@ -136,5 +136,5 @@ export type HistoryEntry = {
   resulting_floor: number;
   resulting_world_line: string;
   resulting_room_id: string;
-  debt_ids_after: string[];
+  cost_ids_after: string[];
 };

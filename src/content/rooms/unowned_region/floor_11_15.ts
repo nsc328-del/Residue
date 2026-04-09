@@ -13,7 +13,7 @@ export const UNOWNED_REGION_FLOOR_11_15_TEMPLATES: RoomTemplate[] = [
     prefers: [],
     forbids: [],
     obstacle:
-      "无主区进一步丧失了形状。每一房都在变成你们的某条债的实体——之前借的东西回来了。",
+      "无主区进一步丧失了形状。每一房都在变成你们的某条代价的实体——之前付出的东西回来了。",
     anchors: [
       {
         id: "a_debt_field",
@@ -23,7 +23,7 @@ export const UNOWNED_REGION_FLOOR_11_15_TEMPLATES: RoomTemplate[] = [
       },
       {
         id: "a_thread",
-        name: "穿过这片债场的窄路",
+        name: "穿过这片代价场的窄路",
         tags: ["passage"],
         hint: "勉强能过",
       },
@@ -37,7 +37,7 @@ export const UNOWNED_REGION_FLOOR_11_15_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_pay_more",
         kind: "ascend",
-        hint: "再付代价让债场散开（注意债越晚还越贵）",
+        hint: "再付代价让代价场散开（注意代价越晚越贵）",
       },
     ],
   },

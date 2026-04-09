@@ -1,7 +1,7 @@
 // Apply a validated diff to a State, returning the new State.
 //
-// This file does NOT regenerate the room — that's the generator's job in
-// Phase 3. apply-diff is purely "fact set / debts / world-line / metadata".
+// This file does NOT regenerate the room — that's the generator's job.
+// apply-diff is purely "fact set / costs / world-line / metadata".
 // Persistence and history append are also handled by callers (commands/apply.ts),
 // so this stays a pure function.
 
@@ -9,11 +9,11 @@ import type {
   Diff,
   DiffOp,
   Fact,
-  Debt,
+  Cost,
   State,
 } from "../state/types.js";
-import { validateDiff, debtPressure, TOP_FLOOR, type CostError } from "./cost.js";
-import { nextDebtId, nextFactId } from "../utils/id.js";
+import { validateDiff, costPressure, TOP_FLOOR, type CostError } from "./cost.js";
+import { nextCostId, nextFactId } from "../utils/id.js";
 
 export type ApplyResult =
   | { ok: true; state: State }
@@ -25,7 +25,7 @@ export function applyDiff(state: State, diff: Diff): ApplyResult {
     return { ok: false, errors };
   }
 
-  // Work on a deep-ish clone. Facts and debts are arrays of plain objects.
+  // Work on a deep-ish clone. Facts and costs are arrays of plain objects.
   const next: State = {
     meta: { ...state.meta },
     world_line: {
@@ -33,7 +33,7 @@ export function applyDiff(state: State, diff: Diff): ApplyResult {
       forks: [...state.world_line.forks],
     },
     facts: state.facts.map((f) => ({ ...f, tags: [...f.tags] })),
-    debts: state.debts.map((d) => ({ ...d, triggers: [...d.triggers] })),
+    costs: state.costs.map((c) => ({ ...c, triggers: [...c.triggers] })),
     current_room: state.current_room,
     partner_state: { ...state.partner_state },
   };
@@ -68,7 +68,7 @@ export function applyDiff(state: State, diff: Diff): ApplyResult {
   // We don't end here automatically because the top room still needs to be
   // generated and narrated. The end-check command flips meta.ended.
 
-  next.partner_state.debt_pressure = debtPressure(next);
+  next.partner_state.cost_pressure = costPressure(next);
   next.partner_state.last_diff_summary = summarize(diff);
 
   return { ok: true, state: next };
@@ -95,20 +95,20 @@ function applyOp(state: State, op: DiffOp, turn: number): void {
       }
       return;
     }
-    case "add_debt": {
-      const debt: Debt = {
-        id: op.debt.id ?? nextDebtId(),
-        severity: op.debt.severity,
-        text: op.debt.text,
+    case "add_cost": {
+      const cost: Cost = {
+        id: op.cost.id ?? nextCostId(),
+        severity: op.cost.severity,
+        text: op.cost.text,
         source_turn: turn,
         settled: false,
-        triggers: [...op.debt.triggers],
+        triggers: [...op.cost.triggers],
       };
-      state.debts.push(debt);
+      state.costs.push(cost);
       return;
     }
-    case "settle_debt": {
-      const target = state.debts.find((d) => d.id === op.id && !d.settled);
+    case "settle_cost": {
+      const target = state.costs.find((c) => c.id === op.id && !c.settled);
       if (target) {
         target.settled = true;
       }

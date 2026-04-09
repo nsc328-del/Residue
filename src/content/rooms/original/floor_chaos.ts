@@ -1,4 +1,4 @@
-// Chaos rooms — original world line. These only appear when debt_pressure
+// Chaos rooms — original world line. These only appear when cost_pressure
 // crosses specific thresholds. The player chose violence; the tower answers.
 
 import type { RoomTemplate } from "../types.js";
@@ -14,7 +14,7 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
     requires: [],
     prefers: ["pressure", "damage"],
     forbids: [],
-    responds_to_debt_triggers: ["trace_smell", "scanner_density+"],
+    responds_to_cost_triggers: ["trace_smell", "scanner_density+"],
     obstacle:
       "你们还没走出走廊，身后就来了。不是巡查，是你们自己留下的东西——井口的碎屑、被撕开的痕迹、被惹恼的密度——它们从楼下倒灌上来，像一股活的追兵。",
     anchors: [
@@ -46,7 +46,7 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_absorb",
         kind: "ascend",
-        hint: "让它追上你们，吃下那个冲击（可以结清一条轻债）",
+        hint: "让它追上你们，吃下那个冲击（可以消解一条轻代价）",
       },
     ],
   },
@@ -62,7 +62,7 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
     prefers: ["aftermath", "damage"],
     forbids: [],
     obstacle:
-      "这一层已经不是一个正常的楼层了。墙在缓慢旋转，地板和天花板之间的距离每几秒变一次。你们的债在改写这个地方的物理。楼梯出口还在，但它在晃，像随时会折断。",
+      "这一层已经不是一个正常的楼层了。墙在缓慢旋转，地板和天花板之间的距离每几秒变一次。你们的代价在改写这个地方的物理。楼梯出口还在，但它在晃，像随时会折断。",
     anchors: [
       {
         id: "a_rotating_wall",
@@ -80,7 +80,7 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
         id: "a_calm_spot",
         name: "房间正中一小块静止的地板",
         tags: ["settle", "anchor"],
-        hint: "在这里站一会儿，可以用一条债的重量把这层重新钉住",
+        hint: "在这里站一会儿，可以用一条代价的重量把这层重新钉住",
       },
     ],
     exits: [
@@ -92,14 +92,14 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_anchor_floor",
         kind: "ascend",
-        hint: "站稳，用一条债的重量稳住这层，再上行（结清一条债）",
+        hint: "站稳，用一条代价的重量稳住这层，再上行（消解一条代价）",
       },
     ],
   },
 
-  // ── pressure ≥ 65: debts take form ──
+  // ── pressure ≥ 65: costs take form ──
   {
-    id: "tpl_o_chaos_debt_incarnate",
+    id: "tpl_o_chaos_cost_incarnate",
     theme: "original",
     floor_range: [10, 14],
     kind: "normal",
@@ -107,20 +107,20 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
     requires: [],
     prefers: ["echo", "aftermath"],
     forbids: [],
-    responds_to_debt_triggers: [
+    responds_to_cost_triggers: [
       "doppelganger",
       "identity_doubt",
       "trace_smell",
       "backflow_pursuit",
     ],
     obstacle:
-      "你们的债活了。不是比喻——它站在房间中央，穿着你们的轮廓，用你们之前每一次'硬闯'的碎片拼成的。它不拦路，它在重建这一层：按照你们'应该'经历但跳过的所有后果来重建。你现在看到的走廊，是你欠下的走廊。",
+      "你们的代价活了。不是比喻——它站在房间中央，穿着你们的轮廓，用你们之前每一次'硬闯'的碎片拼成的。它不拦路，它在重建这一层：按照你们'应该'经历但跳过的所有后果来重建。你现在看到的走廊，是你欠下的走廊。",
     anchors: [
       {
-        id: "a_debt_body",
-        name: "由你们的债拼成的人形",
+        id: "a_cost_body",
+        name: "由你们的代价拼成的人形",
         tags: ["doppelganger", "echo", "backflow"],
-        hint: "它不恨你们——它只是存在，因为你们欠了太多",
+        hint: "它不恨你们——它只是存在，因为你们付出了太多",
       },
       {
         id: "a_rebuilt_corridor",
@@ -138,19 +138,19 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
         id: "a_surrender_weight",
         name: "跪下来承认这些是你的",
         tags: ["settle"],
-        hint: "结清至少两条债，人形就会散开，走廊就会停止重建",
+        hint: "消解至少两条代价，人形就会散开，走廊就会停止重建",
       },
     ],
     exits: [
       {
         id: "e_tear_again",
         kind: "ascend",
-        hint: "再撕一次，继续欠（新增重债）",
+        hint: "再撕一次，继续欠（新增重代价）",
       },
       {
         id: "e_pay_all",
         kind: "ascend",
-        hint: "结清尽量多的债再上行",
+        hint: "消解尽量多的代价再上行",
       },
       {
         id: "e_coexist",
@@ -171,13 +171,13 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
     prefers: [],
     forbids: [],
     obstacle:
-      "塔在叫。不是警报，是结构本身的声音——像一根被拧过头的金属梁终于发出了断裂前的哀鸣。你们的债太重了，这个地方已经不是在阻止你们上行，它是在求你们别再拆了。上行的路还在，但地板正在一块一块脱落，你们脚下只剩钢筋。",
+      "塔在叫。不是警报，是结构本身的声音——像一根被拧过头的金属梁终于发出了断裂前的哀鸣。你们的代价太重了，这个地方已经不是在阻止你们上行，它是在求你们别再拆了。上行的路还在，但地板正在一块一块脱落，你们脚下只剩钢筋。",
     anchors: [
       {
         id: "a_screaming_beam",
         name: "正在断裂的主梁",
         tags: ["aftermath", "structural"],
-        hint: "它的哀鸣频率和你们身上的债数成正比",
+        hint: "它的哀鸣频率和你们身上的代价数成正比",
       },
       {
         id: "a_falling_floor",
@@ -201,7 +201,7 @@ export const ORIGINAL_CHAOS_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_rebuild_one_span",
         kind: "ascend",
-        hint: "用一条重债的代价把脚下这一段修回来（结清一条重债）",
+        hint: "用一条重代价把脚下这一段修回来（消解一条重代价）",
       },
     ],
   },

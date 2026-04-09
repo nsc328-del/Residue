@@ -171,15 +171,15 @@ const MEMORY_SHARD: Storyline = {
 
 const DEBT_WALKER: Storyline = {
   id: "debt_walker",
-  label: "债行者",
+  label: "代价行者",
   opening:
-    "你醒来的时候就欠着了。不知道欠谁，不知道欠了什么，但身上的重量是真实的——像有人把一笔看不见的账缝进了你的骨头里。塔的每一层都有东西在等着收。你的搭档说：到顶层，就能看到账本——到时候你才知道自己到底欠了什么。",
+    "你醒来的时候就背着什么了。不知道从哪里来的，不知道付出了什么，但身上的重量是真实的——像有人把一笔看不见的代价缝进了你的骨头里。塔的每一层都有东西在等着收。你的搭档说：到顶层，就能看到那张清单——到时候你才知道自己到底背了什么。",
   facts: [
     ...sharedFacts(),
     {
       id: "f_premise",
       scope: "structural",
-      text: "你一醒来就背着债。你不知道欠了什么，但每一层都有东西来收。",
+      text: "你一醒来就背着代价。你不知道付出了什么，但每一层都有东西来收。",
       tags: ["premise", "premise_debt_walker"],
       active: true,
       created_at_turn: 0,
@@ -195,7 +195,7 @@ const DEBT_WALKER: Storyline = {
     {
       id: "f_init_collector",
       scope: "local",
-      text: "走廊尽头站着一个收债的轮廓。它没有脸，但它在等你。",
+      text: "走廊尽头站着一个收取代价的轮廓。它没有脸，但它在等你。",
       tags: ["pursuit", "barrier"],
       active: true,
       created_at_turn: 0,

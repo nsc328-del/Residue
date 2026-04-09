@@ -143,12 +143,12 @@ export const ORIGINAL_FLOOR_1_4_TEMPLATES: RoomTemplate[] = [
       {
         id: "e_grab_credential",
         kind: "ascend",
-        hint: "顺走权限面残片再上行（轻债）",
+        hint: "顺走权限面残片再上行（轻代价）",
       },
       {
         id: "e_grab_identity",
         kind: "ascend",
-        hint: "顺走身份残片再上行（轻债）",
+        hint: "顺走身份残片再上行（轻代价）",
       },
     ],
   },
@@ -197,7 +197,7 @@ export const ORIGINAL_FLOOR_1_4_TEMPLATES: RoomTemplate[] = [
     requires: [],
     prefers: [],
     forbids: [],
-    responds_to_debt_triggers: ["scanner_density+", "identity_doubt", "trace_smell"],
+    responds_to_cost_triggers: ["scanner_density+", "identity_doubt", "trace_smell"],
     obstacle:
       "扫描比之前更密了。某种比例上调过的巡查模式正在四周织成一张更细的网。你们留在前面那间房的东西，正在被反查。",
     anchors: [
@@ -205,7 +205,7 @@ export const ORIGINAL_FLOOR_1_4_TEMPLATES: RoomTemplate[] = [
         id: "a_dense_scan",
         name: "更密的扫描网",
         tags: ["scanner", "pressure"],
-        hint: "上一房的代价显形了",
+        hint: "之前付出的代价显形了",
       },
       {
         id: "a_callback",

@@ -1,10 +1,10 @@
-// Catalog of debt "shapes" the agent can borrow from when constructing diffs.
-// The agent isn't required to use these — it can invent debt text on the fly.
+// Catalog of cost "shapes" the agent can borrow from when constructing diffs.
+// The agent isn't required to use these — it can invent cost text on the fly.
 // But these are the recurring kinds the generator knows how to react to via
-// `responds_to_debt_triggers` in templates.
+// `responds_to_cost_triggers` in templates.
 //
 // Trigger vocabulary (used by templates and generator):
-//   scanner_density+    — scans get heavier (Act 1 light debt回响)
+//   scanner_density+    — scans get heavier (Act 1 light cost回响)
 //   trace_smell         — leaves a residue scent that hounds can follow
 //   identity_doubt      — your身份在某个账本里出现矛盾
 //   backflow            — 下方层数追兵开始涌上来
@@ -13,9 +13,9 @@
 //   unowned             — 在无主区世界线显形
 //   forged_break        — 伪造的脆弱事实开始裂开
 
-import type { NewDebt } from "./../state/types.js";
+import type { NewCost } from "./../state/types.js";
 
-export const DEBT_CATALOG: Record<string, NewDebt> = {
+export const COST_CATALOG: Record<string, NewCost> = {
   shaft_damage: {
     severity: "light",
     text: "维护井的暴力损伤被记录",

@@ -35,7 +35,7 @@ export function runEndCheck(stateDir: string): string {
         floor: state.meta.floor,
         // Hand the agent the raw signals it needs for closing narration.
         active_facts: state.facts.filter((f) => f.active).length,
-        open_debts: state.debts.filter((d) => !d.settled).length,
+        open_costs: state.costs.filter((c) => !c.settled).length,
         world_line: state.world_line.current,
         forks: state.world_line.forks.length,
       },

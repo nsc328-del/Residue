@@ -2,7 +2,7 @@
 //
 // The generator is the bridge between fact set and what the player sees. It
 // has zero language model in it. It picks a template by tag-scoring against
-// active facts and open debts, then fills slots and stamps an id.
+// active facts and open costs, then fills slots and stamps an id.
 
 import type {
   AnchorTemplate,
@@ -10,7 +10,7 @@ import type {
   ExitTemplate,
   Room,
   State,
-  Debt,
+  Cost,
 } from "../state/types.js";
 import type { RoomTemplate } from "../content/rooms/types.js";
 import { loadAllRoomTemplates } from "../content/rooms/registry.js";
@@ -22,20 +22,20 @@ const NODE_FLOORS = new Set([5, 10, 15]);
 export function generateRoom(state: State): Room {
   const templates = loadAllRoomTemplates();
   const activeFactTags = collectFactTags(state.facts);
-  const openDebtTriggers = collectOpenDebtTriggers(state.debts);
+  const openCostTriggers = collectOpenCostTriggers(state.costs);
 
   const eligible = templates.filter((tpl) =>
-    isEligible(tpl, state, activeFactTags, openDebtTriggers)
+    isEligible(tpl, state, activeFactTags, openCostTriggers)
   );
 
   if (eligible.length === 0) {
     return fallbackRoom(state);
   }
 
-  const pressure = state.partner_state.debt_pressure;
+  const pressure = state.partner_state.cost_pressure;
   const scored = eligible.map((tpl) => ({
     tpl,
-    score: scoreTemplate(tpl, activeFactTags, openDebtTriggers, pressure),
+    score: scoreTemplate(tpl, activeFactTags, openCostTriggers, pressure),
   }));
 
   // Highest score wins. Ties broken deterministically by (seed, turn).
@@ -56,11 +56,11 @@ function collectFactTags(facts: Fact[]): Set<string> {
   return out;
 }
 
-function collectOpenDebtTriggers(debts: Debt[]): Set<string> {
+function collectOpenCostTriggers(costs: Cost[]): Set<string> {
   const out = new Set<string>();
-  for (const d of debts) {
-    if (d.settled) continue;
-    for (const t of d.triggers) out.add(t);
+  for (const c of costs) {
+    if (c.settled) continue;
+    for (const t of c.triggers) out.add(t);
   }
   return out;
 }
@@ -69,14 +69,14 @@ function isEligible(
   tpl: RoomTemplate,
   state: State,
   factTags: Set<string>,
-  _debtTriggers: Set<string>
+  _costTriggers: Set<string>
 ): boolean {
   if (tpl.theme !== state.world_line.current) return false;
   if (state.meta.floor < tpl.floor_range[0] || state.meta.floor > tpl.floor_range[1]) {
     return false;
   }
-  // Pressure gate: chaos rooms only unlock when debt_pressure is high enough
-  if (tpl.pressure_min && state.partner_state.debt_pressure < tpl.pressure_min) {
+  // Pressure gate: chaos rooms only unlock when cost_pressure is high enough
+  if (tpl.pressure_min && state.partner_state.cost_pressure < tpl.pressure_min) {
     return false;
   }
   // Hard requires
@@ -97,24 +97,24 @@ function isEligible(
 function scoreTemplate(
   tpl: RoomTemplate,
   factTags: Set<string>,
-  debtTriggers: Set<string>,
+  costTriggers: Set<string>,
   pressure: number
 ): number {
   let score = 0;
   for (const p of tpl.prefers) {
     if (factTags.has(p)) score += 10;
   }
-  // Debt-trigger matches are heavy — open debts should pull their repay
+  // Cost-trigger matches are heavy — open costs should pull their repay
   // rooms to the front of the line.
-  for (const t of tpl.responds_to_debt_triggers ?? []) {
-    if (debtTriggers.has(t)) score += 50;
+  for (const t of tpl.responds_to_cost_triggers ?? []) {
+    if (costTriggers.has(t)) score += 50;
   }
   // Node templates get a baseline bump on their lock floor so they always
   // beat any non-node fallback that slipped through.
   if (tpl.is_node) score += 5;
   // Chaos bonus: pressure-gated templates get a score boost proportional to
   // how far the player has pushed beyond the threshold. The world literally
-  // warps toward insanity when debts pile up.
+  // warps toward insanity when costs pile up.
   if (tpl.pressure_min && pressure >= tpl.pressure_min) {
     score += Math.floor((pressure - tpl.pressure_min) / 5) * 10 + 20;
   }

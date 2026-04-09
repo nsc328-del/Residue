@@ -7,12 +7,12 @@ export function newRunId(): string {
 }
 
 let factCounter = 0;
-let debtCounter = 0;
+let costCounter = 0;
 let roomCounter = 0;
 
 export function resetIdCounters(): void {
   factCounter = 0;
-  debtCounter = 0;
+  costCounter = 0;
   roomCounter = 0;
 }
 
@@ -21,9 +21,9 @@ export function nextFactId(prefix = "f"): string {
   return `${prefix}_${factCounter.toString(36)}`;
 }
 
-export function nextDebtId(prefix = "d"): string {
-  debtCounter += 1;
-  return `${prefix}_${debtCounter.toString(36)}`;
+export function nextCostId(prefix = "c"): string {
+  costCounter += 1;
+  return `${prefix}_${costCounter.toString(36)}`;
 }
 
 export function nextRoomId(prefix = "r"): string {

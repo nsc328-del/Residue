@@ -11,14 +11,14 @@ export function runDebugFacts(stateDir: string): string {
     );
   }
   lines.push("");
-  lines.push("DEBTS:");
-  if (state.debts.length === 0) {
+  lines.push("COSTS:");
+  if (state.costs.length === 0) {
     lines.push("  (none)");
   } else {
-    for (const d of state.debts) {
-      const status = d.settled ? "[settled]" : "[open]";
+    for (const c of state.costs) {
+      const status = c.settled ? "[settled]" : "[open]";
       lines.push(
-        `  ${status} ${d.id} (${d.severity}) ${d.text}  triggers=[${d.triggers.join(",")}]`
+        `  ${status} ${c.id} (${c.severity}) ${c.text}  triggers=[${c.triggers.join(",")}]`
       );
     }
   }

@@ -25,7 +25,7 @@ function mkState(facts: Fact[] = []): State {
     },
     world_line: { current: "original", forks: [] },
     facts,
-    debts: [],
+    costs: [],
     current_room: {
       id: "r0",
       template_id: "tpl0",
@@ -37,7 +37,7 @@ function mkState(facts: Fact[] = []): State {
       active_fact_ids: [],
       generated_from: [],
     },
-    partner_state: { debt_pressure: 0, last_diff_summary: null },
+    partner_state: { cost_pressure: 0, last_diff_summary: null },
   };
 }
 
@@ -52,7 +52,7 @@ function mkDiff(ops: Diff["operations"]): Diff {
 describe("applyDiff", () => {
   it("returns errors when validation fails", () => {
     const state = mkState([mkFact({ id: "f1", scope: "region" })]);
-    const diff = mkDiff([{ op: "remove_fact", id: "f1" }]); // missing debt
+    const diff = mkDiff([{ op: "remove_fact", id: "f1" }]); // missing cost
     const result = applyDiff(state, diff);
     expect(result.ok).toBe(false);
   });
@@ -80,24 +80,24 @@ describe("applyDiff", () => {
     expect(result.state.facts[0]!.created_at_turn).toBe(1);
   });
 
-  it("adds debts and updates pressure", () => {
+  it("adds costs and updates pressure", () => {
     const state = mkState([mkFact({ id: "f1", scope: "region" })]);
     const diff = mkDiff([
       { op: "remove_fact", id: "f1" },
-      { op: "add_debt", debt: { severity: "light", text: "x", triggers: [] } },
+      { op: "add_cost", cost: { severity: "light", text: "x", triggers: [] } },
     ]);
     const result = applyDiff(state, diff);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.state.debts).toHaveLength(1);
-    expect(result.state.partner_state.debt_pressure).toBe(10);
+    expect(result.state.costs).toHaveLength(1);
+    expect(result.state.partner_state.cost_pressure).toBe(10);
   });
 
-  it("settles a debt and recalculates pressure", () => {
+  it("settles a cost and recalculates pressure", () => {
     const state = mkState();
-    state.debts = [
+    state.costs = [
       {
-        id: "d1",
+        id: "c1",
         severity: "heavy",
         text: "追兵倒灌",
         source_turn: 0,
@@ -105,12 +105,12 @@ describe("applyDiff", () => {
         triggers: ["backflow"],
       },
     ];
-    const diff = mkDiff([{ op: "settle_debt", id: "d1" }]);
+    const diff = mkDiff([{ op: "settle_cost", id: "c1" }]);
     const result = applyDiff(state, diff);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.state.debts[0]!.settled).toBe(true);
-    expect(result.state.partner_state.debt_pressure).toBe(0);
+    expect(result.state.costs[0]!.settled).toBe(true);
+    expect(result.state.partner_state.cost_pressure).toBe(0);
   });
 
   it("forks worldline and decrements perma token correctly", () => {
@@ -119,8 +119,8 @@ describe("applyDiff", () => {
     ]);
     const diff = mkDiff([
       { op: "remove_fact", id: "f1" },
-      { op: "add_debt", debt: { severity: "medium", text: "x", triggers: [] } },
-      { op: "add_debt", debt: { severity: "light", text: "y", triggers: [] } },
+      { op: "add_cost", cost: { severity: "medium", text: "x", triggers: [] } },
+      { op: "add_cost", cost: { severity: "light", text: "y", triggers: [] } },
       { op: "mark_worldline_fork", to: "unowned_region", cause: "skipped layers" },
     ]);
     const result = applyDiff(state, diff);
@@ -170,8 +170,8 @@ describe("applyDiff", () => {
     // Simulate agent passing delta instead of absolute floor
     const diff = mkDiff([
       { op: "remove_fact", id: "f1" },
-      { op: "add_debt", debt: { severity: "medium", text: "x", triggers: [] } },
-      { op: "add_debt", debt: { severity: "light", text: "y", triggers: [] } },
+      { op: "add_cost", cost: { severity: "medium", text: "x", triggers: [] } },
+      { op: "add_cost", cost: { severity: "light", text: "y", triggers: [] } },
       { op: "jump_floor", to: undefined as unknown as number },
     ]);
     const result = applyDiff(state, diff);

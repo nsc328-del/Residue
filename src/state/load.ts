@@ -11,6 +11,35 @@ export function statePath(stateDir: string): string {
   return join(stateDir, STATE_FILENAME);
 }
 
+/**
+ * Migrate a raw parsed state from the old debt-based schema to the new
+ * cost-based schema, if needed. This is a best-effort in-place migration
+ * so existing run/ directories keep working after the rename.
+ */
+function migrateState(raw: Record<string, unknown>): State {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const s = raw as any;
+
+  // debts -> costs
+  if (s.debts !== undefined && s.costs === undefined) {
+    s.costs = s.debts;
+    delete s.debts;
+  }
+
+  // partner_state.debt_pressure -> partner_state.cost_pressure
+  if (s.partner_state) {
+    if (
+      s.partner_state.debt_pressure !== undefined &&
+      s.partner_state.cost_pressure === undefined
+    ) {
+      s.partner_state.cost_pressure = s.partner_state.debt_pressure;
+      delete s.partner_state.debt_pressure;
+    }
+  }
+
+  return s as State;
+}
+
 export function loadState(stateDir: string = DEFAULT_STATE_DIR): State {
   const p = statePath(stateDir);
   if (!existsSync(p)) {
@@ -19,7 +48,7 @@ export function loadState(stateDir: string = DEFAULT_STATE_DIR): State {
     );
   }
   const raw = readFileSync(p, "utf8");
-  return JSON.parse(raw) as State;
+  return migrateState(JSON.parse(raw));
 }
 
 export function saveState(state: State, stateDir: string = DEFAULT_STATE_DIR): void {

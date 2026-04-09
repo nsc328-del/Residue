@@ -21,7 +21,7 @@ export type RoomTemplate = {
   // Required debt triggers — if any of these strings appear in any open
   // debt's `triggers` array, this template gets a strong score boost. This is
   // how repay rooms get auto-selected when their target debt is open.
-  responds_to_debt_triggers?: string[];
+  responds_to_cost_triggers?: string[];
 
   // Whether this template is eligible only when the floor is exactly the
   // first number of floor_range AND the floor is one of the locked node

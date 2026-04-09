@@ -23,16 +23,16 @@ describe("worldline fork", () => {
         { op: "remove_fact", id: "f_init_order" },
         { op: "jump_floor", to: 7 },
         {
-          op: "add_debt",
-          debt: {
+          op: "add_cost",
+          cost: {
             severity: "medium",
             text: "下方 N 层的看守体系没见过你们但知道你们跳过了他们",
             triggers: ["backflow", "pursuit"],
           },
         },
         {
-          op: "add_debt",
-          debt: {
+          op: "add_cost",
+          cost: {
             severity: "light",
             text: "无主区的接缝从未被你们经过",
             triggers: ["unowned"],
@@ -56,7 +56,7 @@ describe("worldline fork", () => {
     expect(next.world_line.forks).toHaveLength(1);
     expect(next.current_room.theme).toBe("unowned_region");
     expect(next.meta.floor).toBe(7);
-    expect(next.partner_state.debt_pressure).toBeGreaterThan(0);
+    expect(next.partner_state.cost_pressure).toBeGreaterThan(0);
   });
 
   it("worldline fork is irreversible (no backwards op)", () => {

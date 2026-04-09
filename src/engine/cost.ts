@@ -5,22 +5,22 @@
 // Scope         What costs                                   Rejected if violated
 // ----------    ------------------------------------------   --------------------
 // local         nothing                                      —
-// region        diff must add ≥1 debt of severity ≥light      yes
-// structural    diff must add ≥2 debts, ≥1 of severity        yes
+// region        diff must add ≥1 cost of severity ≥light      yes
+// structural    diff must add ≥2 costs, ≥1 of severity        yes
 //               medium; AND if the removed structural fact
 //               crosses world-line tag (worldline_*), the
 //               diff must include mark_worldline_fork
 // root          diff must include consume_perma_token, AND
 //               state.meta.perma_rewrite_token_remaining ≥ 1   yes
 
-import type { Diff, DiffOp, Fact, State, NewDebt, DebtSeverity } from "../state/types.js";
+import type { Diff, DiffOp, Fact, State, NewCost, CostSeverity } from "../state/types.js";
 
 export type CostError = {
   code: string;
   message: string;
 };
 
-const SEVERITY_RANK: Record<DebtSeverity, number> = {
+const SEVERITY_RANK: Record<CostSeverity, number> = {
   light: 1,
   medium: 2,
   heavy: 3,
@@ -30,10 +30,10 @@ function findFact(state: State, id: string): Fact | undefined {
   return state.facts.find((f) => f.id === id && f.active);
 }
 
-function newDebtsIn(diff: Diff): NewDebt[] {
+function newCostsIn(diff: Diff): NewCost[] {
   return diff.operations
-    .filter((op): op is Extract<DiffOp, { op: "add_debt" }> => op.op === "add_debt")
-    .map((op) => op.debt);
+    .filter((op): op is Extract<DiffOp, { op: "add_cost" }> => op.op === "add_cost")
+    .map((op) => op.cost);
 }
 
 function hasOp<K extends DiffOp["op"]>(
@@ -68,10 +68,10 @@ export function validateDiff(diff: Diff, state: State): CostError[] {
   const removals = diff.operations.filter(
     (op): op is Extract<DiffOp, { op: "remove_fact" }> => op.op === "remove_fact"
   );
-  const debts = newDebtsIn(diff);
-  const debtCount = debts.length;
-  const hasMedium = debts.some((d) => SEVERITY_RANK[d.severity] >= SEVERITY_RANK.medium);
-  const hasLight = debts.some((d) => SEVERITY_RANK[d.severity] >= SEVERITY_RANK.light);
+  const costs = newCostsIn(diff);
+  const costCount = costs.length;
+  const hasMedium = costs.some((c) => SEVERITY_RANK[c.severity] >= SEVERITY_RANK.medium);
+  const hasLight = costs.some((c) => SEVERITY_RANK[c.severity] >= SEVERITY_RANK.light);
 
   let removedRoot = false;
   let removedStructural = false;
@@ -135,12 +135,12 @@ export function validateDiff(diff: Diff, state: State): CostError[] {
   }
 
   if (removedStructural) {
-    if (debtCount < 2) {
+    if (costCount < 2) {
       errors.push({
-        code: "STRUCTURAL_NEEDS_TWO_DEBTS",
+        code: "STRUCTURAL_NEEDS_TWO_COSTS",
         message:
-          "structural rewrites must add at least 2 debts in the same diff (got " +
-          debtCount +
+          "structural rewrites must add at least 2 costs in the same diff (got " +
+          costCount +
           ")",
       });
     }
@@ -148,7 +148,7 @@ export function validateDiff(diff: Diff, state: State): CostError[] {
       errors.push({
         code: "STRUCTURAL_NEEDS_MEDIUM",
         message:
-          "structural rewrites require at least 1 medium-severity debt in the same diff",
+          "structural rewrites require at least 1 medium-severity cost in the same diff",
       });
     }
     if (removedStructuralCrossesWorldline && !hasOp(diff, "mark_worldline_fork")) {
@@ -163,9 +163,9 @@ export function validateDiff(diff: Diff, state: State): CostError[] {
   if (removedRegion && !removedStructural && !removedRoot) {
     if (!hasLight) {
       errors.push({
-        code: "REGION_NEEDS_LIGHT_DEBT",
+        code: "REGION_NEEDS_LIGHT_COST",
         message:
-          "region rewrites must add at least 1 debt (severity ≥ light) in the same diff",
+          "region rewrites must add at least 1 cost (severity ≥ light) in the same diff",
       });
     }
   }
@@ -190,11 +190,11 @@ export function validateDiff(diff: Diff, state: State): CostError[] {
   return errors;
 }
 
-export function debtPressure(state: State): number {
+export function costPressure(state: State): number {
   let pressure = 0;
-  for (const d of state.debts) {
-    if (d.settled) continue;
-    pressure += { light: 10, medium: 25, heavy: 50 }[d.severity];
+  for (const c of state.costs) {
+    if (c.settled) continue;
+    pressure += { light: 10, medium: 25, heavy: 50 }[c.severity];
   }
   return Math.min(100, pressure);
 }

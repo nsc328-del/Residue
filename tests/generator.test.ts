@@ -25,7 +25,7 @@ function mkState(floor: number, facts: Fact[] = []): State {
     },
     world_line: { current: "original", forks: [] },
     facts,
-    debts: [],
+    costs: [],
     current_room: {
       id: "r0",
       template_id: "tpl0",
@@ -37,7 +37,7 @@ function mkState(floor: number, facts: Fact[] = []): State {
       active_fact_ids: [],
       generated_from: [],
     },
-    partner_state: { debt_pressure: 0, last_diff_summary: null },
+    partner_state: { cost_pressure: 0, last_diff_summary: null },
   };
 }
 
