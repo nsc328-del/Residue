@@ -171,7 +171,7 @@ const MEMORY_SHARD: Storyline = {
 
 const DEBT_WALKER: Storyline = {
   id: "debt_walker",
-  label: "代价行者",
+  label: "债行者",
   opening:
     "你醒来的时候就背着什么了。不知道从哪里来的，不知道付出了什么，但身上的重量是真实的——像有人把一笔看不见的代价缝进了你的骨头里。塔的每一层都有东西在等着收。你的搭档说：到顶层，就能看到那张清单——到时候你才知道自己到底背了什么。",
   facts: [
