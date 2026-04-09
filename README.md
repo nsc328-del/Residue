@@ -6,6 +6,34 @@
 
 ---
 
+## 怎么玩
+
+clone 下来，装好依赖，在项目根目录开一个 Claude Code（或任何能跑 bash 的 agent），然后把下面这段话复制粘贴给它：
+
+### 中文 prompt（复制即用）
+
+```
+读一下这个项目里的 AGENT_PROMPT.md，从现在开始你就是里面说的"搭档"。
+然后运行 node dist/cli.js init，叙述第一间房，等我说话。我说一句，你推一拍。
+```
+
+### English prompt (copy & paste)
+
+```
+Read the AGENT_PROMPT.md file in this project. From now on you ARE the "partner" described in it.
+Then run `node dist/cli.js init`, narrate the first room, and wait for me to speak. One sentence from me, one beat from you.
+```
+
+想指定故事线的话，告诉 agent：
+
+```
+用 node dist/cli.js init --story stolen_face 开局
+```
+
+之后就用自然语言说话。比如"撕开那个井"、"我们慢慢走"、"贪一手那东西"、"狠狠干"。什么都行，一句话一拍。
+
+---
+
 ## 安装
 
 ```bash
