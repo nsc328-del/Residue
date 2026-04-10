@@ -164,7 +164,9 @@ describe("e2e full run — conservative path", () => {
       s = step(s, local("继续往上", "我们继续往上"));
     }
     expect(s.meta.floor).toBe(15);
-    expect(s.current_room.template_id).toBe("tpl_o_15_top");
+    // Floor 15 is a node floor — should pick a node template (repeating or
+    // endgame depending on readiness). Endgame requires endgame_ready tag.
+    expect(s.current_room.template_id).toMatch(/^tpl_o_(15_top|node_)/);
 
     // The top room should reference active facts (via active_fact_ids list).
     expect(s.current_room.active_fact_ids.length).toBeGreaterThan(0);
@@ -254,7 +256,8 @@ describe("e2e full run — adventurous path", () => {
       s = step(s, local("继续往上", "我们继续往上"));
     }
     expect(s.meta.floor).toBe(15);
-    expect(s.current_room.template_id).toBe("tpl_ur_15_top");
+    // Floor 15 node — repeating or endgame depending on readiness
+    expect(s.current_room.template_id).toMatch(/^tpl_ur_(15_top|node_)/);
     expect(s.world_line.current).toBe("unowned_region");
   });
 });
@@ -274,12 +277,12 @@ describe("e2e — engine guarantees", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("never advances beyond floor 15", () => {
+  it("advances beyond floor 15 (no hard cap)", () => {
     let s = startRun(4);
     s.meta.floor = 14;
     const result = applyDiff(s, {
       player_sentence: "再走一步",
-      rationale: "should cap at 15",
+      rationale: "should reach 15",
       operations: [
         { op: "add_fact", fact: { scope: "local", text: "ok", tags: [] } },
       ],
@@ -287,16 +290,16 @@ describe("e2e — engine guarantees", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.state.meta.floor).toBe(15);
-    // Auto-advance again from 15 should still be 15 (capped).
+    // Auto-advance from 15 should now go to 16 (no cap).
     const r2 = applyDiff(result.state, {
       player_sentence: "再一步",
-      rationale: "cap test",
+      rationale: "no cap test",
       operations: [
         { op: "add_fact", fact: { scope: "local", text: "ok", tags: [] } },
       ],
     });
     expect(r2.ok).toBe(true);
     if (!r2.ok) return;
-    expect(r2.state.meta.floor).toBe(15);
+    expect(r2.state.meta.floor).toBe(16);
   });
 });

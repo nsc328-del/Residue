@@ -37,6 +37,16 @@ function migrateState(raw: Record<string, unknown>): State {
     }
   }
 
+  // low_pressure_turns (added for dynamic end-check)
+  if (s.meta && s.meta.low_pressure_turns === undefined) {
+    s.meta.low_pressure_turns = 0;
+  }
+
+  // end_readiness (added for dynamic end-check)
+  if (s.partner_state && s.partner_state.end_readiness === undefined) {
+    s.partner_state.end_readiness = 0;
+  }
+
   return s as State;
 }
 

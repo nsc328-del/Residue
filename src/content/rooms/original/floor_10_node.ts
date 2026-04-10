@@ -1,8 +1,8 @@
 // Act 2 — Floor 10 node, original world line. Three variants:
 //
-//   tpl_o_10_node_repay        — selected when the player carries a heavy debt
-//   tpl_o_10_node_light_burst  — selected when only light debts are open
-//   tpl_o_10_node_hard         — selected when no debt is open
+//   tpl_o_10_node_repay        — selected when the player carries a heavy cost
+//   tpl_o_10_node_light_burst  — selected when only light costs are open
+//   tpl_o_10_node_hard         — selected when no cost is open
 //
 // The generator picks via responds_to_cost_triggers + scoring; the heaviest
 // match wins. is_node + floor lock guarantees this floor always picks one of
@@ -40,7 +40,7 @@ export const ORIGINAL_FLOOR_10_NODES: RoomTemplate[] = [
         id: "a_shoulder",
         name: "可以把代价转嫁到别的系统的接口",
         tags: ["device", "transfer"],
-        hint: "把债推给别的东西，自己脱身",
+        hint: "把代价推给别的东西，自己脱身",
       },
       {
         id: "a_accept",

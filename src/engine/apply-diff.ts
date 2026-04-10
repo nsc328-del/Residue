@@ -12,7 +12,7 @@ import type {
   Cost,
   State,
 } from "../state/types.js";
-import { validateDiff, costPressure, TOP_FLOOR, type CostError } from "./cost.js";
+import { validateDiff, costPressure, endReadiness, type CostError } from "./cost.js";
 import { nextCostId, nextFactId } from "../utils/id.js";
 
 export type ApplyResult =
@@ -46,11 +46,13 @@ export function applyDiff(state: State, diff: Diff): ApplyResult {
     applyOp(next, op, turn);
   }
 
-  // Floor advancement. If the diff included jump_floor, that op already set
-  // the floor. Otherwise auto-advance by 1 — every diff is one beat.
-  const hadJump = diff.operations.some((o) => o.op === "jump_floor");
-  if (!hadJump) {
-    next.meta.floor = Math.min(TOP_FLOOR, state.meta.floor + 1);
+  // Floor advancement. If a valid jump_floor already changed the floor, keep
+  // it. Otherwise auto-advance by 1 — every diff is one beat. We detect
+  // "valid jump" by checking whether the floor actually moved, so a silently
+  // rejected jump_floor (bad value) still falls through to auto-advance.
+  const floorChangedByJump = next.meta.floor !== state.meta.floor;
+  if (!floorChangedByJump) {
+    next.meta.floor = state.meta.floor + 1;
   }
 
   // Auto-deactivate floor-bound facts when floor changes. Facts tagged
@@ -70,6 +72,21 @@ export function applyDiff(state: State, diff: Diff): ApplyResult {
 
   next.partner_state.cost_pressure = costPressure(next);
   next.partner_state.last_diff_summary = summarize(diff);
+
+  // Track consecutive low-pressure turns for stagnation detection
+  if (next.partner_state.cost_pressure < 20) {
+    next.meta.low_pressure_turns = (state.meta.low_pressure_turns ?? 0) + 1;
+  } else {
+    next.meta.low_pressure_turns = 0;
+  }
+
+  // Compute end readiness
+  next.partner_state.end_readiness = endReadiness(next);
+
+  // Auto-end when readiness hits 90+ (minimum floor 10 to prevent degenerate early ends)
+  if (next.partner_state.end_readiness >= 90 && !next.meta.ended && next.meta.floor >= 10) {
+    next.meta.ended = { reason: "readiness", floor: next.meta.floor };
+  }
 
   return { ok: true, state: next };
 }
@@ -105,6 +122,15 @@ function applyOp(state: State, op: DiffOp, turn: number): void {
         triggers: [...op.cost.triggers],
       };
       state.costs.push(cost);
+      // Cost shield: auto-settle if a matching shield fact is active
+      const shieldTag = `cost_shield_${cost.severity}`;
+      const shield = state.facts.find(
+        (f) => f.active && f.tags.includes(shieldTag)
+      );
+      if (shield) {
+        cost.settled = true;
+        shield.active = false;
+      }
       return;
     }
     case "settle_cost": {
@@ -138,7 +164,15 @@ function applyOp(state: State, op: DiffOp, turn: number): void {
         // absolute floor), refuse silently rather than corrupting state.
         return;
       }
-      state.meta.floor = Math.min(TOP_FLOOR, target);
+      const delta = target - state.meta.floor;
+      state.meta.floor = target;
+      // Consume floor_skip fact if used for a +2 jump
+      if (delta === 2) {
+        const skip = state.facts.find(
+          (f) => f.active && f.tags.includes("floor_skip")
+        );
+        if (skip) skip.active = false;
+      }
       return;
     }
   }

@@ -43,7 +43,8 @@ function hasOp<K extends DiffOp["op"]>(
   return diff.operations.some((op) => op.op === kind);
 }
 
-export const TOP_FLOOR = 15;
+/** Soft target — used for readiness calculations, not as a hard cap. */
+export const SOFT_FLOOR_TARGET = 15;
 
 function jumpDelta(diff: Diff, currentFloor: number): number {
   const op = diff.operations.find(
@@ -87,9 +88,15 @@ export function validateDiff(diff: Diff, state: State): CostError[] {
     });
   }
   if (jump > 1) {
-    // Treat large jumps as structural-cost. The agent stays free to also
-    // include mark_worldline_fork on top, but it isn't auto-required.
-    removedStructural = true;
+    // A floor_skip fact lets a +2 jump pass without structural cost (once).
+    const hasFloorSkip = state.facts.some(
+      (f) => f.active && f.tags.includes("floor_skip")
+    );
+    if (!(hasFloorSkip && jump === 2)) {
+      // Treat large jumps as structural-cost. The agent stays free to also
+      // include mark_worldline_fork on top, but it isn't auto-required.
+      removedStructural = true;
+    }
   }
 
   for (const op of removals) {
@@ -196,5 +203,36 @@ export function costPressure(state: State): number {
     if (c.settled) continue;
     pressure += { light: 10, medium: 25, heavy: 50 }[c.severity];
   }
-  return Math.min(100, pressure);
+  // Apply pressure modifiers from active fact tags
+  for (const f of state.facts) {
+    if (!f.active) continue;
+    for (const tag of f.tags) {
+      const match = tag.match(/^pressure_mod_(minus|plus)(\d+)$/);
+      if (match) {
+        const delta = parseInt(match[2]!, 10);
+        pressure += match[1] === "minus" ? -delta : delta;
+      }
+    }
+  }
+  return Math.max(0, Math.min(100, pressure));
+}
+
+/** Compute end-readiness score (0-100) from multiple signals. */
+export function endReadiness(state: State): number {
+  const floor = state.meta.floor;
+  const totalCosts = state.costs.length;
+  const settledCosts = state.costs.filter((c) => c.settled).length;
+  const lowPressureTurns = state.meta.low_pressure_turns;
+
+  // Floor signal: reaches 40 at SOFT_FLOOR_TARGET, caps at 60
+  const floorSignal = Math.min(60, (floor / SOFT_FLOOR_TARGET) * 40);
+
+  // Resolution signal: high when most costs are settled (max 20)
+  const resolutionSignal =
+    totalCosts > 0 ? (settledCosts / totalCosts) * 20 : 0;
+
+  // Stagnation signal: pressure staying low means game is winding down (max 20)
+  const stagnationSignal = Math.min(20, lowPressureTurns * 4);
+
+  return Math.min(100, Math.round(floorSignal + resolutionSignal + stagnationSignal));
 }

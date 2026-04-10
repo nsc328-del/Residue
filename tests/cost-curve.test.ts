@@ -22,6 +22,7 @@ function mkState(facts: Fact[]): State {
       started_at: "2026-01-01T00:00:00Z",
       ended: false,
       perma_rewrite_token_remaining: 1,
+      low_pressure_turns: 0,
     },
     world_line: { current: "original", forks: [] },
     facts,
@@ -37,7 +38,7 @@ function mkState(facts: Fact[]): State {
       active_fact_ids: [],
       generated_from: [],
     },
-    partner_state: { cost_pressure: 0, last_diff_summary: null },
+    partner_state: { cost_pressure: 0, end_readiness: 0, last_diff_summary: null },
   };
 }
 
@@ -213,5 +214,106 @@ describe("cost curve", () => {
       const errors = validateDiff(diff, state);
       expect(errors.map((e) => e.code)).toContain("FACT_NOT_FOUND");
     });
+
+    it("floor_skip tag bypasses structural cost for +2 jump", () => {
+      const state = mkState([
+        mkFact({ id: "f_skip", scope: "local", tags: ["floor_skip"] }),
+      ]);
+      state.meta.floor = 5;
+      // Jump from 5 to 7 (+2) with floor_skip — should NOT need structural costs
+      const diff = mkDiff([{ op: "jump_floor", to: 7 }]);
+      const errors = validateDiff(diff, state);
+      expect(errors.length).toBe(0);
+    });
+
+    it("floor_skip tag does NOT bypass structural cost for +3 jump", () => {
+      const state = mkState([
+        mkFact({ id: "f_skip", scope: "local", tags: ["floor_skip"] }),
+      ]);
+      state.meta.floor = 5;
+      // Jump from 5 to 8 (+3) — floor_skip only works for +2
+      const diff = mkDiff([{ op: "jump_floor", to: 8 }]);
+      const errors = validateDiff(diff, state);
+      expect(errors.map((e) => e.code)).toContain("STRUCTURAL_NEEDS_TWO_COSTS");
+    });
+  });
+});
+
+// ── pressure_mod + endReadiness tests ──
+
+import { costPressure, endReadiness } from "../src/engine/cost.js";
+
+describe("costPressure with pressure_mod tags", () => {
+  it("pressure_mod_minus reduces effective pressure", () => {
+    const state = mkState([
+      mkFact({ id: "f_mod", scope: "local", tags: ["pressure_mod_minus10"] }),
+    ]);
+    state.costs.push({
+      id: "c1",
+      severity: "medium",
+      text: "test",
+      source_turn: 0,
+      settled: false,
+      triggers: [],
+    });
+    // medium = 25 base, -10 from mod = 15
+    expect(costPressure(state)).toBe(15);
+  });
+
+  it("pressure_mod_plus increases effective pressure", () => {
+    const state = mkState([
+      mkFact({ id: "f_mod", scope: "local", tags: ["pressure_mod_plus15"] }),
+    ]);
+    // No costs, but +15 from mod
+    expect(costPressure(state)).toBe(15);
+  });
+
+  it("pressure is clamped to 0-100", () => {
+    const state = mkState([
+      mkFact({ id: "f_mod", scope: "local", tags: ["pressure_mod_minus50"] }),
+    ]);
+    // No costs, -50 from mod — should clamp to 0
+    expect(costPressure(state)).toBe(0);
+  });
+});
+
+describe("endReadiness", () => {
+  it("returns low value at floor 1 with no history", () => {
+    const state = mkState();
+    state.meta.floor = 1;
+    expect(endReadiness(state)).toBeLessThan(10);
+  });
+
+  it("rises with floor progression", () => {
+    const state = mkState();
+    state.meta.floor = 15;
+    const r15 = endReadiness(state);
+    state.meta.floor = 30;
+    const r30 = endReadiness(state);
+    expect(r15).toBeGreaterThan(0);
+    expect(r30).toBeGreaterThan(r15);
+  });
+
+  it("rises with cost resolution", () => {
+    const state = mkState();
+    state.meta.floor = 15;
+    state.costs = [
+      { id: "c1", severity: "light", text: "x", source_turn: 1, settled: false, triggers: [] },
+      { id: "c2", severity: "light", text: "y", source_turn: 2, settled: true, triggers: [] },
+    ];
+    const withPartial = endReadiness(state);
+    state.costs[0]!.settled = true;
+    const withAll = endReadiness(state);
+    expect(withAll).toBeGreaterThan(withPartial);
+  });
+
+  it("rises with low_pressure_turns stagnation", () => {
+    const state = mkState();
+    state.meta.floor = 10;
+    state.meta.low_pressure_turns = 0;
+    const base = endReadiness(state);
+    state.meta.low_pressure_turns = 5;
+    const stagnant = endReadiness(state);
+    expect(stagnant).toBeGreaterThan(base);
   });
 });

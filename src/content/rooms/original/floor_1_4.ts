@@ -153,7 +153,7 @@ export const ORIGINAL_FLOOR_1_4_TEMPLATES: RoomTemplate[] = [
     ],
   },
 
-  // ----- Floor 4 (no debt echoes) -----
+  // ----- Floor 4 (no cost echoes) -----
   {
     id: "tpl_o_4_calm",
     theme: "original",
@@ -187,7 +187,7 @@ export const ORIGINAL_FLOOR_1_4_TEMPLATES: RoomTemplate[] = [
     ],
   },
 
-  // ----- Floor 4 (with light debt echoes) -----
+  // ----- Floor 4 (with light cost echoes) -----
   // This one is selected when the player took something on floor 3.
   {
     id: "tpl_o_4_echo",

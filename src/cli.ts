@@ -73,7 +73,7 @@ function printHelp(): void {
       "  room                        Print current room",
       "  apply '<diff json>'         Apply a diff",
       "  memory '<query>'            Search history",
-      "  end-check                   Check terminal state",
+      "  end-check [--end]            Check terminal state (--end to finish run)",
       "  debug-facts                 Dump fact table",
       "",
     ].join("\n")
@@ -151,7 +151,8 @@ async function main(): Promise<void> {
     }
 
     case "end-check": {
-      process.stdout.write(runEndCheck(stateDir) + "\n");
+      const forceEnd = args.flags["end"] === true;
+      process.stdout.write(runEndCheck(stateDir, forceEnd) + "\n");
       return;
     }
 

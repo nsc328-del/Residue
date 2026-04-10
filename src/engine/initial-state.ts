@@ -46,6 +46,7 @@ export function buildInitialState(opts: InitOptions = {}): State {
       started_at: now,
       ended: false,
       perma_rewrite_token_remaining: 1,
+      low_pressure_turns: 0,
       storyline: storyline.id,
     },
     world_line: {
@@ -57,6 +58,7 @@ export function buildInitialState(opts: InitOptions = {}): State {
     current_room: PLACEHOLDER_ROOM,
     partner_state: {
       cost_pressure: 0,
+      end_readiness: 0,
       last_diff_summary: null,
     },
   };

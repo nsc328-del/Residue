@@ -22,6 +22,7 @@ function mkState(floor: number, facts: Fact[] = []): State {
       started_at: "2026-01-01T00:00:00Z",
       ended: false,
       perma_rewrite_token_remaining: 1,
+      low_pressure_turns: 0,
     },
     world_line: { current: "original", forks: [] },
     facts,
@@ -37,7 +38,7 @@ function mkState(floor: number, facts: Fact[] = []): State {
       active_fact_ids: [],
       generated_from: [],
     },
-    partner_state: { cost_pressure: 0, last_diff_summary: null },
+    partner_state: { cost_pressure: 0, end_readiness: 0, last_diff_summary: null },
   };
 }
 

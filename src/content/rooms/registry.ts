@@ -12,6 +12,9 @@ import { UNOWNED_REGION_FLOOR_6_10_TEMPLATES } from "./unowned_region/floor_6_10
 import { UNOWNED_REGION_FLOOR_11_15_TEMPLATES } from "./unowned_region/floor_11_15.js";
 import { ORIGINAL_CHAOS_TEMPLATES } from "./original/floor_chaos.js";
 import { UNOWNED_CHAOS_TEMPLATES } from "./unowned_region/floor_chaos.js";
+import { ORIGINAL_NODE_REPEATING_TEMPLATES } from "./original/floor_node_repeating.js";
+import { UNOWNED_NODE_REPEATING_TEMPLATES } from "./unowned_region/floor_node_repeating.js";
+import { STORYLINE_ECHO_TEMPLATES } from "./original/floor_storyline_echoes.js";
 
 export function loadAllRoomTemplates(): RoomTemplate[] {
   return [
@@ -22,6 +25,10 @@ export function loadAllRoomTemplates(): RoomTemplate[] {
     ...ORIGINAL_FLOOR_6_9_TEMPLATES,
     ...ORIGINAL_FLOOR_10_NODES,
     ...ORIGINAL_FLOOR_11_15_TEMPLATES,
+    ...ORIGINAL_NODE_REPEATING_TEMPLATES,
+
+    // ----- Storyline echo rooms (mid/late game, premise-gated) -----
+    ...STORYLINE_ECHO_TEMPLATES,
 
     // ----- Chaos rooms (pressure-gated) -----
     ...ORIGINAL_CHAOS_TEMPLATES,
@@ -30,5 +37,6 @@ export function loadAllRoomTemplates(): RoomTemplate[] {
     // ----- Unowned region world line -----
     ...UNOWNED_REGION_FLOOR_6_10_TEMPLATES,
     ...UNOWNED_REGION_FLOOR_11_15_TEMPLATES,
+    ...UNOWNED_NODE_REPEATING_TEMPLATES,
   ];
 }

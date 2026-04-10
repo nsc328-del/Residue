@@ -22,6 +22,7 @@ function mkState(facts: Fact[] = []): State {
       started_at: "2026-01-01T00:00:00Z",
       ended: false,
       perma_rewrite_token_remaining: 1,
+      low_pressure_turns: 0,
     },
     world_line: { current: "original", forks: [] },
     facts,
@@ -37,7 +38,7 @@ function mkState(facts: Fact[] = []): State {
       active_fact_ids: [],
       generated_from: [],
     },
-    partner_state: { cost_pressure: 0, last_diff_summary: null },
+    partner_state: { cost_pressure: 0, end_readiness: 0, last_diff_summary: null },
   };
 }
 
@@ -197,5 +198,102 @@ describe("applyDiff", () => {
     expect(result.state.facts.find((f) => f.id === "f_pos")!.active).toBe(false);
     // non-floor_bound fact should remain active
     expect(result.state.facts.find((f) => f.id === "f_perm")!.active).toBe(true);
+  });
+
+  it("cost_shield auto-settles matching cost and deactivates shield fact", () => {
+    const state = mkState([
+      mkFact({
+        id: "f_shield",
+        scope: "local",
+        tags: ["cost_shield_light"],
+      }),
+    ]);
+    const diff = mkDiff([
+      {
+        op: "add_cost",
+        cost: { severity: "light", text: "a light cost", triggers: [] },
+      },
+    ]);
+    const result = applyDiff(state, diff);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // The cost should be auto-settled
+    const cost = result.state.costs[0]!;
+    expect(cost.settled).toBe(true);
+    // The shield fact should be deactivated
+    expect(result.state.facts.find((f) => f.id === "f_shield")!.active).toBe(false);
+  });
+
+  it("cost_shield does not trigger for mismatched severity", () => {
+    const state = mkState([
+      mkFact({
+        id: "f_shield",
+        scope: "local",
+        tags: ["cost_shield_medium"],
+      }),
+    ]);
+    const diff = mkDiff([
+      {
+        op: "add_cost",
+        cost: { severity: "light", text: "a light cost", triggers: [] },
+      },
+    ]);
+    const result = applyDiff(state, diff);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Cost should NOT be settled (shield is medium, cost is light)
+    expect(result.state.costs[0]!.settled).toBe(false);
+    // Shield fact should remain active
+    expect(result.state.facts.find((f) => f.id === "f_shield")!.active).toBe(true);
+  });
+
+  it("tracks low_pressure_turns and computes end_readiness", () => {
+    const state = mkState();
+    state.meta.floor = 14;
+    // No costs = pressure 0 = low pressure
+    const diff = mkDiff([
+      { op: "add_fact", fact: { scope: "local", text: "x", tags: [] } },
+    ]);
+    const r1 = applyDiff(state, diff);
+    expect(r1.ok).toBe(true);
+    if (!r1.ok) return;
+    expect(r1.state.meta.low_pressure_turns).toBe(1);
+    expect(r1.state.partner_state.end_readiness).toBeGreaterThan(0);
+
+    // Second turn — low pressure streak continues
+    const r2 = applyDiff(r1.state, diff);
+    expect(r2.ok).toBe(true);
+    if (!r2.ok) return;
+    expect(r2.state.meta.low_pressure_turns).toBe(2);
+  });
+
+  it("resets low_pressure_turns when pressure rises above 20", () => {
+    const state = mkState();
+    state.meta.low_pressure_turns = 5;
+    // Add a medium cost to push pressure to 25
+    const diff = mkDiff([
+      {
+        op: "add_cost",
+        cost: { severity: "medium", text: "heavy stuff", triggers: [] },
+      },
+    ]);
+    const result = applyDiff(state, diff);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state.meta.low_pressure_turns).toBe(0);
+    expect(result.state.partner_state.cost_pressure).toBe(25);
+  });
+
+  it("invalid jump_floor falls through to auto-advance", () => {
+    const state = mkState();
+    state.meta.floor = 5;
+    const diff = mkDiff([
+      { op: "jump_floor", to: undefined as unknown as number },
+    ]);
+    const result = applyDiff(state, diff);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Should auto-advance to 6 since invalid jump didn't change floor
+    expect(result.state.meta.floor).toBe(6);
   });
 });

@@ -10,6 +10,7 @@ export const UNOWNED_REGION_FLOOR_6_10_TEMPLATES: RoomTemplate[] = [
     theme: "unowned_region",
     floor_range: [6, 9],
     kind: "normal",
+    scales_beyond: true,
     requires: [],
     prefers: ["pursuit", "backflow", "unowned"],
     forbids: [],
@@ -54,6 +55,7 @@ export const UNOWNED_REGION_FLOOR_6_10_TEMPLATES: RoomTemplate[] = [
     theme: "unowned_region",
     floor_range: [6, 9],
     kind: "normal",
+    scales_beyond: true,
     requires: [],
     prefers: ["unowned"],
     forbids: [],
@@ -88,8 +90,109 @@ export const UNOWNED_REGION_FLOOR_6_10_TEMPLATES: RoomTemplate[] = [
     ],
   },
 
+  // ── Ownerless court ──
+  {
+    id: "tpl_ur_6_9_court",
+    theme: "unowned_region",
+    floor_range: [6, 9],
+    kind: "normal",
+    scales_beyond: true,
+    requires: [],
+    prefers: ["unowned"],
+    forbids: [],
+    obstacle:
+      "一个没有法官的审判台。台上方有一把空椅子，椅子前面是一面镜子。无主区不审判别人——它审判你自己。你可以坐上去，面对镜子，选择你的某条代价，然后宣判：承认它，或者否认它。无主区会接受你的判决，不管对错。",
+    anchors: [
+      {
+        id: "a_empty_bench",
+        name: "没有法官的审判台",
+        tags: ["device", "unowned"],
+        hint: "法官的位置是给你坐的",
+      },
+      {
+        id: "a_judgement_mirror",
+        name: "审判台前的镜子",
+        tags: ["identity", "device"],
+        hint: "你会看见自己——以及你身上背着的代价",
+      },
+      {
+        id: "a_verdict_slot",
+        name: "台子下方一个刻着'判决'的凹槽",
+        tags: ["device"],
+        hint: "把你的判决放进去——承认或否认",
+      },
+    ],
+    exits: [
+      {
+        id: "e_pass_court",
+        kind: "ascend",
+        hint: "不坐上去，绕过审判台继续走",
+      },
+      {
+        id: "e_judge_self",
+        kind: "ascend",
+        hint: "坐上去审判自己的一条代价（可以消解，但判决本身会成为新事实）",
+      },
+    ],
+  },
+
+  // ── Inverted pursuit ──
+  {
+    id: "tpl_ur_6_9_mirror_pursuit",
+    theme: "unowned_region",
+    floor_range: [7, 9],
+    kind: "normal",
+    scales_beyond: true,
+    requires: [],
+    prefers: ["pursuit", "backflow"],
+    forbids: [],
+    obstacle:
+      "追兵不再从下方来了。它们从上方来——倒着追，像一段被倒放的录像。你抬头看见它们正头朝下沿着天花板移动，动作和你见过的追兵一模一样但方向全反了。它们在追的不是现在的你，而是'即将到达上面的你'。",
+    anchors: [
+      {
+        id: "a_inverted_pursuers",
+        name: "从上方倒着追下来的追兵",
+        tags: ["pursuit", "geometry"],
+        hint: "它们在拦截你的未来位置——如果你不改变速度，它们会在上一层等到你",
+      },
+      {
+        id: "a_time_gap",
+        name: "你和'被追的未来你'之间的时间差",
+        tags: ["device", "echo"],
+        hint: "如果你能拉开这个时间差，它们就追错了位置",
+      },
+    ],
+    exits: [
+      {
+        id: "e_race_up",
+        kind: "ascend",
+        hint: "加速——让你到达的时间和它们预测的不一样",
+      },
+      {
+        id: "e_stall",
+        kind: "ascend",
+        hint: "故意减速，让它们在上面扑空，然后从它们背后穿过",
+      },
+    ],
+    anchor_pool: [
+      {
+        id: "a_reversed_footprint",
+        name: "天花板上倒着的脚印",
+        tags: ["echo", "pursuit"],
+        hint: "那是它们留下的——时间反向的追踪印记",
+      },
+      {
+        id: "a_future_debris",
+        name: "从上方掉下来的、你还没到过的那一层的碎片",
+        tags: ["geometry", "echo"],
+        hint: "上面那层的东西已经先于你开始碎了",
+      },
+    ],
+    anchor_pick_count: 1,
+  },
+
   // Floor 10 node — unowned_region variant of repay/burst/hard.
-  // The split is the same as the original-line node: by debt severity.
+  // The split is the same as the original-line node: by cost severity.
   {
     id: "tpl_ur_10_node_repay",
     theme: "unowned_region",

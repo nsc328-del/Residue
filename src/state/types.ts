@@ -23,7 +23,7 @@ export type Cost = {
   text: string;
   source_turn: number;
   settled: boolean;
-  triggers: string[]; // generator hints, e.g. ["scanner_density+", "backflow_pursuit"]
+  triggers: string[]; // generator hints, e.g. ["scanner_density+", "backflow", "pursuit"]
 };
 
 export type AnchorTemplate = {
@@ -50,7 +50,7 @@ export type Room = {
   obstacle: string;
   exits: ExitTemplate[];
   active_fact_ids: string[]; // facts that show up in this room
-  generated_from: string[]; // ids of facts/debts that drove template selection
+  generated_from: string[]; // template ids that drove selection
 };
 
 export type WorldLine = {
@@ -68,17 +68,19 @@ export type WorldLineFork = {
 export type PartnerState = {
   // Engine exposes raw signals; the agent decides how to perform.
   cost_pressure: number; // 0..100
+  end_readiness: number; // 0..100, composite signal for when to end the run
   last_diff_summary: string | null;
 };
 
 export type Meta = {
   run_id: string;
   seed: number;
-  floor: number; // 1..15
+  floor: number; // 1..∞
   turn: number;
   started_at: string; // ISO timestamp
   ended: false | { reason: string; floor: number };
   perma_rewrite_token_remaining: number; // starts at 1
+  low_pressure_turns: number; // consecutive turns with pressure < 20
   storyline?: string; // which opening storyline was chosen
 };
 

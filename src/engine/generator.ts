@@ -17,11 +17,17 @@ import { loadAllRoomTemplates } from "../content/rooms/registry.js";
 import { mulberry32, pickIndex } from "../utils/rng.js";
 import { nextRoomId } from "../utils/id.js";
 
-const NODE_FLOORS = new Set([5, 10, 15]);
+function isNodeFloor(floor: number): boolean {
+  return floor > 0 && floor % 5 === 0;
+}
 
 export function generateRoom(state: State): Room {
   const templates = loadAllRoomTemplates();
   const activeFactTags = collectFactTags(state.facts);
+  // Inject synthetic endgame_ready tag when readiness is high enough
+  if ((state.partner_state.end_readiness ?? 0) >= 60) {
+    activeFactTags.add("endgame_ready");
+  }
   const openCostTriggers = collectOpenCostTriggers(state.costs);
 
   const eligible = templates.filter((tpl) =>
@@ -72,9 +78,9 @@ function isEligible(
   _costTriggers: Set<string>
 ): boolean {
   if (tpl.theme !== state.world_line.current) return false;
-  if (state.meta.floor < tpl.floor_range[0] || state.meta.floor > tpl.floor_range[1]) {
-    return false;
-  }
+  // Floor range check — scales_beyond ignores the upper bound
+  if (state.meta.floor < tpl.floor_range[0]) return false;
+  if (!tpl.scales_beyond && state.meta.floor > tpl.floor_range[1]) return false;
   // Pressure gate: chaos rooms only unlock when cost_pressure is high enough
   if (tpl.pressure_min && state.partner_state.cost_pressure < tpl.pressure_min) {
     return false;
@@ -88,9 +94,9 @@ function isEligible(
     if (factTags.has(f)) return false;
   }
   // Lock node floors to is_node templates and vice versa
-  const isNodeFloor = NODE_FLOORS.has(state.meta.floor);
-  if (isNodeFloor && !tpl.is_node) return false;
-  if (!isNodeFloor && tpl.is_node) return false;
+  const nodeFloor = isNodeFloor(state.meta.floor);
+  if (nodeFloor && !tpl.is_node) return false;
+  if (!nodeFloor && tpl.is_node) return false;
   return true;
 }
 
@@ -112,6 +118,10 @@ function scoreTemplate(
   // Node templates get a baseline bump on their lock floor so they always
   // beat any non-node fallback that slipped through.
   if (tpl.is_node) score += 5;
+  // Fact-tag matches — storyline flavour rooms, item reactions, etc.
+  for (const t of tpl.responds_to_fact_tags ?? []) {
+    if (factTags.has(t)) score += 50;
+  }
   // Chaos bonus: pressure-gated templates get a score boost proportional to
   // how far the player has pushed beyond the threshold. The world literally
   // warps toward insanity when costs pile up.
@@ -123,12 +133,35 @@ function scoreTemplate(
 
 function instantiate(tpl: RoomTemplate, state: State): Room {
   const activeFactIds = state.facts.filter((f) => f.active).map((f) => f.id);
+
+  // Fixed anchors
+  const anchors = tpl.anchors.map((a) => fillAnchorSlots(a, state));
+
+  // Random anchors from pool (seeded so same seed+turn = same picks)
+  if (tpl.anchor_pool && tpl.anchor_pool.length > 0) {
+    // anchor_bonus facts increase the number of picks from the pool
+    const anchorBonus = state.facts.filter(
+      (f) => f.active && f.tags.includes("anchor_bonus")
+    ).length;
+    const pickCount = Math.min(
+      (tpl.anchor_pick_count ?? 1) + anchorBonus,
+      tpl.anchor_pool.length
+    );
+    const rand = mulberry32(state.meta.seed + state.meta.turn + 9999);
+    const pool = [...tpl.anchor_pool];
+    for (let i = 0; i < pickCount; i++) {
+      const idx = pickIndex(rand, pool.length);
+      anchors.push(fillAnchorSlots(pool[idx]!, state));
+      pool.splice(idx, 1);
+    }
+  }
+
   return {
     id: nextRoomId(),
     template_id: tpl.id,
     theme: tpl.theme,
     floor: state.meta.floor,
-    anchors: tpl.anchors.map((a) => fillAnchorSlots(a, state)),
+    anchors,
     obstacle: fillSlots(tpl.obstacle, state),
     exits: tpl.exits.map((e) => ({ ...e } satisfies ExitTemplate)),
     active_fact_ids: activeFactIds,
